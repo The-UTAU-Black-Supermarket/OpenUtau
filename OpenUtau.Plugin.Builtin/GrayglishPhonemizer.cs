@@ -1,9 +1,8 @@
-﻿using OpenUtau.Api;
-using OpenUtau.Core.Ustx;
-using Serilog;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenUtau.Api;
+using OpenUtau.Core.Ustx;
 
 namespace OpenUtau.Plugin.Builtin {
     [Phonemizer("GraySlate X-SAMPA English", "EN Grayglish", "TUBS")]
@@ -19,20 +18,174 @@ namespace OpenUtau.Plugin.Builtin {
         public override void SetSinger(USinger singer) => this.singer = singer;
 
         public override Result Process(Note[] notes, Note? prev, Note? next, Note? prevNeighbour, Note? nextNeighbour) {
+            //var prevSymbols = prevNeighbour == null ? null : GetSymbols(prevNeighbour.Value);
+            //var prevSymbol = prevSymbols == null ? "-" : prevSymbols.Last();
             var note = notes[0];
             var symbols = GetSymbols(note);
+            //var nextSymbols = nextNeighbour == null ? null : GetSymbols(nextNeighbour.Value);
+            //var nextSymbol = nextSymbols == null ? "-" : nextSymbols.First();
 
-            return new Result {
-                phonemes = new Phoneme[] {
-                    new Phoneme() {
-                        phoneme = string.Join(" ", symbols)
+            if (symbols == null || symbols.Length == 0) {
+                return new Result {
+                    phonemes = new Phoneme[] {
+                        new Phoneme() {
+                            phoneme = note.lyric
+                        }
+                    }
+                };
+            }
+
+            var phonemes = new List<Phoneme>();
+
+            var isVowelArray = symbols.Select(s => isVowel[s]).ToArray();
+            var vowelPositions = new List<int>();
+            for (var i = 0; i < isVowelArray.Length; i++) {
+                if (isVowelArray[i]) {
+                    vowelPositions.Add(i);
+                }
+            }
+            int firstVowelPos = vowelPositions[0];
+            var firstVowel = symbols[firstVowelPos];
+
+            if (firstVowelPos == 0) {
+                //var text = "";
+                //if (prevSymbol == "-") {
+                //    text = $"-{vowel}";
+                //} else {
+                //    if (isVowel.ContainsKey(prevSymbol) && isVowel[prevSymbol]) {
+                //        if (prevSymbol == vowel) {
+                //            text = vowel;
+                //        } else {
+                //            text = $"{prevSymbol} {vowel}";
+                //        }
+                //    } else {
+                //        text = $"{prevSymbol}{vowel}";
+                //        text = NSub(text, note.tone);
+                //    }
+                //}
+
+                phonemes.Add(new Phoneme() {
+                    phoneme = firstVowel
+                });
+            } else if (firstVowelPos == 1) {
+                var cv = $"{symbols[0]}{firstVowel}";
+                cv = NSub(cv, note.tone);
+
+                //if (isVowel.ContainsKey(prevSymbol) && isVowel[prevSymbol]) {
+                //    var vc = $"{prevSymbol} {symbols[0]}";
+                //    vc = NSub(vc, prevNeighbour.Value.tone);
+                //    var length = 80;
+                //    if (singer.TryGetMappedOto(cv, note.tone, out var oto)) {
+                //        phonemes.Add(new Phoneme() {
+                //            phoneme = vc,
+                //            position = 0 - MsToTick(oto.Preutter)
+                //        });
+                //    }
+                //}
+                
+                phonemes.Add(new Phoneme() {
+                    phoneme = cv
+                });
+            } else {
+                //var prefix = prevSymbol == "-" ? "-" : "";
+                var cluster = "";
+                for (var i = 0; i < firstVowelPos; i++) {
+                    cluster += symbols[i];
+                }
+                cluster = NSub(cluster, note.tone);
+
+                var cv = $"{symbols[firstVowelPos - 1]}{symbols[firstVowelPos]}";
+                cv = NSub(cv, note.tone);
+                var clusterLength = 80;
+                if (singer.TryGetMappedOto(cv, note.tone, out var oto)) {
+                    clusterLength = MsToTick(oto.Preutter);
+                }
+
+                //if (isVowel.ContainsKey(prevSymbol) && isVowel[prevSymbol]) {
+                //    var vc = $"{prevSymbol} {symbols[0]}";
+                //    vc = NSub(vc, prevNeighbour.Value.tone);
+                //    var vcLength = 80;
+                //    if (singer.TryGetMappedOto(cluster, note.tone, out oto)) {
+                //        vcLength = MsToTick(oto.Preutter);
+                //        phonemes.Add(new Phoneme() {
+                //            phoneme = vc,
+                //            position = 0 - vcLength - clusterLength
+                //        });
+                //    }
+                //}
+
+                phonemes.Add(new Phoneme() {
+                    phoneme = cluster,
+                    position = 0 - clusterLength
+
+                });
+                phonemes.Add(new Phoneme() {
+                    phoneme = cv
+                });
+            }
+
+            if (vowelPositions.Count() > 1) {
+                // more syllables
+            } else {
+                int noteLength = 0;
+                Array.ForEach(notes, i => noteLength += i.duration);
+
+                var remainder = symbols.Length - 1 - firstVowelPos;
+                if (remainder > 0) {
+                    if (remainder == 1) {
+                        var vc = $"{firstVowel}{symbols[firstVowelPos + 1]}";
+                        vc = NSub(vc, note.tone);
+                        phonemes.Add(new Phoneme() {
+                            phoneme = vc,
+                            position = noteLength - Math.Min(120, noteLength / 2)
+                        });
+                    } else {
+                        var vc = $"{firstVowel} {symbols[firstVowelPos + 1]}";
+                        vc = NSub(vc, note.tone);
+
+                        var cluster = "";
+                        for (var i = firstVowelPos + 1; i < symbols.Length; i++) {
+                            cluster += symbols[i];
+                        }
+                        cluster = NSub(cluster, note.tone);
+
+                        var vcLength = 120;
+                        var clusterLength = Math.Min(noteLength / 3, 120);
+
+                        if (singer.TryGetMappedOto(cluster, note.tone, out var oto)) {
+                            vcLength = Math.Min(noteLength / 3, MsToTick(oto.Preutter));
+                        }
+
+                        phonemes.Add(new Phoneme() {
+                            phoneme = vc,
+                            position = noteLength - clusterLength - vcLength
+                        });
+                        phonemes.Add(new Phoneme() {
+                            phoneme = cluster,
+                            position = noteLength - clusterLength
+                        });
                     }
                 }
+                //else {
+                //    // vowel coda
+                //    if (nextSymbol == "-") {
+                //        phonemes.Add(new Phoneme() {
+                //            phoneme = $"{symbols[firstVowel]}-",
+                //            position = noteLength - 120
+                //        });
+                //    } else if (!isVowel[nextSymbol]) {
+                //        // insert vc??
+                //    }
+                //}
+            }
+
+            return new Result {
+                phonemes = phonemes.ToArray()
             };
         }
 
         // Bool to signify vowels
-        private Dictionary<string, bool> validSymbols = new Dictionary<string, bool> {
+        private Dictionary<string, bool> isVowel = new Dictionary<string, bool> {
             {"a", true},
             {"i", true},
             {"u", true},
@@ -124,16 +277,17 @@ namespace OpenUtau.Plugin.Builtin {
             {"zh", "Z"}
         };
 
-        string[] GetSymbols(Note note) {
+        private string[] GetSymbols(Note note) {
             if (string.IsNullOrEmpty(note.phoneticHint)) {
                 var arpabet = cmudict.Query(note.lyric.ToLowerInvariant());
+                if (arpabet == null) {
+                    return null;
+                }
                 var converted = new List<string>();
                 for (var i = 0; i < arpabet.Length; i++) {
                     var symbol = arpabet[i];
                     if (symbol == "ae" && (arpabet[i+1] == "n" || arpabet[i+1] == "m")) {
                         converted.Add("e@");
-                        //converted.Add(next);
-                        //i++;
                     } else {
                         converted.Add(symbolMap[symbol]);
                     }
@@ -141,8 +295,17 @@ namespace OpenUtau.Plugin.Builtin {
                 return converted.ToArray();
             }
             return note.phoneticHint.Split()
-                .Where(s => validSymbols.ContainsKey(s))
+                .Where(s => isVowel.ContainsKey(s))
                 .ToArray();
+        }
+    
+        private string NSub(string phoneme, int tone) {
+            if (phoneme.IndexOf("N") > -1) {
+                if (!singer.TryGetMappedOto(phoneme, tone, out var _)) {
+                    return phoneme.Replace("N", "n");
+                }
+            }
+            return phoneme;
         }
     }
 }
