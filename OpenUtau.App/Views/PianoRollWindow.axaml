@@ -274,6 +274,13 @@
             <Menu CornerRadius="2" Height="20" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
               <MenuItem Height="20" Header="{DynamicResource pianoroll.menu.part}">
                 <MenuItem Header="{DynamicResource pianoroll.menu.part.rename}" Click="OnMenuRenamePart"/>
+                <MenuItem Header="{DynamicResource pianoroll.menu.part.legacypluginexp}" Items="{Binding LegacyPlugins}">
+                  <MenuItem.DataTemplates>
+                    <DataTemplate DataType="vm:MenuItemViewModel">
+                      <MenuItem Header="{Binding Header}" Command="{Binding Command}" CommandParameter="{Binding CommandParameter}"/>
+                    </DataTemplate>
+                  </MenuItem.DataTemplates>
+                </MenuItem>
               </MenuItem>
               <MenuItem Height="20" Header="{DynamicResource pianoroll.menu.notes}" Items="{Binding NoteBatchEdits}">
                 <MenuItem.DataTemplates>
@@ -282,10 +289,10 @@
                   </DataTemplate>
                 </MenuItem.DataTemplates>
               </MenuItem>
-              <MenuItem Height="20" Header="{DynamicResource pianoroll.menu.lyrics}" Items="{Binding Transformers}">
+              <MenuItem Height="20" Header="{DynamicResource pianoroll.menu.lyrics}" Items="{Binding LyricBatchEdits}">
                 <MenuItem.DataTemplates>
-                  <DataTemplate DataType="api:TransformerFactory">
-                    <MenuItem Header="{Binding Name}" Command="{x:Static vm:PianoRollViewModel.TransformerCommand}" CommandParameter="{Binding}"/>
+                  <DataTemplate DataType="vm:MenuItemViewModel">
+                    <MenuItem Header="{Binding Header}" Command="{Binding Command}" CommandParameter="{Binding CommandParameter}"/>
                   </DataTemplate>
                 </MenuItem.DataTemplates>
               </MenuItem>
@@ -294,7 +301,7 @@
         </Border>
       </StackPanel>
       <Rectangle Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-                 Margin="0,0,0,48" Height="6" Opacity="0.15" IsVisible="{Binding NotesViewModel.ShowPhoneme}">
+                 Margin="0,0,0,60" Height="6" Opacity="0.15" IsVisible="{Binding NotesViewModel.ShowPhoneme}">
         <Rectangle.Fill>
           <LinearGradientBrush StartPoint="0,0" EndPoint="0,6">
             <GradientStop Color="Transparent" Offset="0"/>
@@ -302,7 +309,7 @@
           </LinearGradientBrush>
         </Rectangle.Fill>
       </Rectangle>
-      <c:PhonemeCanvas Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="0" Height="48"
+      <c:PhonemeCanvas Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="0" Height="60"
                        Background="{DynamicResource BackgroundBrushSemi}"
                        TickWidth="{Binding NotesViewModel.TickWidth}"
                        TickOffset="{Binding NotesViewModel.TickOffset}"

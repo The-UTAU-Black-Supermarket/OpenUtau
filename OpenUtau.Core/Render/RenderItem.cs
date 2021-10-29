@@ -48,6 +48,9 @@ namespace OpenUtau.Core.Render {
             ResamplerName = resamplerName;
             if (project.expressions.TryGetValue("eng", out var descriptor)) {
                 int index = (int)phoneme.GetExpression(project, "eng").Item1;
+                if (index < 0 || index >= descriptor.options.Length) {
+                    index = 0;
+                }
                 string resampler = descriptor.options[index];
                 if (!string.IsNullOrEmpty(resampler)) {
                     ResamplerName = resampler;
@@ -135,7 +138,7 @@ namespace OpenUtau.Core.Render {
             foreach (var currNote in notes) {
                 double noteStartMs = project.TickToMillisecond(currNote.position - note.position);
                 double noteEndMs = project.TickToMillisecond(currNote.End - note.position);
-                double vibratoStartMs = noteStartMs + project.TickToMillisecond(note.duration * (1 - note.vibrato.length / 100.0));
+                double vibratoStartMs = noteStartMs + project.TickToMillisecond(currNote.duration * (1 - currNote.vibrato.length / 100.0));
                 double vibratoLengthMs = noteEndMs - vibratoStartMs;
                 while (currMs < noteStartMs && index < pitches.Length) {
                     currMs += intervalMs;

@@ -33,7 +33,6 @@ namespace OpenUtau.UI.Models {
         UVoicePart _part;
         public UVoicePart Part { get { return _part; } }
         public Classic.Plugin[] Plugins => DocManager.Inst.Plugins;
-        public TransformerFactory[] Transformers => DocManager.Inst.TransformerFactories;
 
         public Canvas TimelineCanvas;
         public Canvas MidiCanvas;
@@ -500,34 +499,13 @@ namespace OpenUtau.UI.Models {
             var project = DocManager.Inst.Project;
             var tempFile = System.IO.Path.Combine(PathManager.Inst.GetCachePath(), "temp.ust");
             var newPart = (UVoicePart)Part.Clone();
-            var sequence = Ust.WriteNotes(project, newPart, newPart.notes, tempFile);
+            var sequence = Ust.WritePart(project, newPart, newPart.notes, tempFile);
             plugin.Run(tempFile);
             Ust.ParseDiffs(project, newPart, sequence, tempFile);
             newPart.AfterLoad(project, project.tracks[Part.trackNo]);
             DocManager.Inst.StartUndoGroup();
             DocManager.Inst.ExecuteCmd(new ReplacePartCommand(project, Part, newPart));
             DocManager.Inst.EndUndoGroup();
-        }
-
-        private ICommand transformerCommand;
-        public ICommand TransformerCommand => transformerCommand ?? (transformerCommand = new RelayCommand<object>(OnTransformerSelected));
-        void OnTransformerSelected(object obj) {
-            var factory = (TransformerFactory)obj;
-            try {
-                var transformer = factory.Create();
-                DocManager.Inst.StartUndoGroup();
-                string[] newLyrics = new string[Part.notes.Count];
-                int i = 0;
-                foreach (var note in Part.notes) {
-                    newLyrics[i++] = transformer.Transform(note.lyric);
-                }
-                DocManager.Inst.ExecuteCmd(new ChangeNoteLyricCommand(Part, Part.notes.ToArray(), newLyrics));
-            } catch (Exception e) {
-                Log.Error(e, $"Failed to run transformer {factory.name}");
-                DocManager.Inst.ExecuteCmd(new UserMessageNotification(e.ToString()));
-            } finally {
-                DocManager.Inst.EndUndoGroup();
-            }
         }
 
         # region ICmdSubscriber
