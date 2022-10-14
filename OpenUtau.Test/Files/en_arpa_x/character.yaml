@@ -1,0 +1,17 @@
+portrait_opacity: 0.5
+subbanks:
+- color: ''
+  prefix: ''
+  suffix: ''
+  tone_ranges:
+  - C1-B3
+- color: ''
+  prefix: ''
+  suffix: _H
+  tone_ranges:
+  - C4-B7
+- color: Power
+  prefix: ''
+  suffix: _P
+  tone_ranges:
+  - C1-B7
