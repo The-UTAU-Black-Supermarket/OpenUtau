@@ -1,0 +1,99 @@
+%YAML 1.2
+---
+cv-space: true
+symbols:
+  - symbol: aa
+    type: vowel
+  - symbol: ae
+    type: vowel
+  - symbol: ah
+    type: vowel
+  - symbol: ao
+    type: vowel
+  - symbol: eh
+    type: vowel
+  - symbol: er
+    type: vowel
+  - symbol: ih
+    type: vowel
+  - symbol: iy
+    type: vowel
+  - symbol: uh
+    type: vowel
+  - symbol: uw
+    type: vowel
+  - symbol: ay
+    type: vowel
+  - symbol: ey
+    type: vowel
+  - symbol: oy
+    type: vowel
+  - symbol: ow
+    type: vowel
+  - symbol: aw
+    type: vowel
+  - symbol: ax
+    type: vowel
+  - symbol: b
+    type: consonant
+  - symbol: ch
+    type: consonant
+  - symbol: d
+    type: consonant
+  - symbol: dh
+    type: consonant
+  - symbol: f
+    type: consonant
+  - symbol: g
+    type: consonant
+  - symbol: hh
+    type: consonant
+  - symbol: jh
+    type: consonant
+  - symbol: k
+    type: consonant
+  - symbol: l
+    type: consonant
+  - symbol: m
+    type: consonant
+  - symbol: n
+    type: consonant
+  - symbol: ng
+    type: consonant
+  - symbol: p
+    type: consonant
+  - symbol: r
+    type: consonant
+  - symbol: s
+    type: consonant
+  - symbol: sh
+    type: consonant
+  - symbol: t
+    type: consonant
+  - symbol: th
+    type: consonant
+  - symbol: v
+    type: consonant
+  - symbol: w
+    type: consonant
+  - symbol: y
+    type: consonant
+  - symbol: z
+    type: consonant
+  - symbol: zh
+    type: consonant
+  - symbol: dx
+    type: consonant
+  - symbol: kk
+    type: consonant
+    transition: k
+  - symbol: an
+    old: ae n
+    type: vowel
+  - symbol: st
+    old: s t
+    type: consonant
+    transition: s
+entries:
+  - grapheme: openutau
+    phonemes: [ow, p, eh, n, uw, t, aw]
