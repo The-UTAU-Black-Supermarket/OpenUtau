@@ -10,7 +10,8 @@ symbols:
     type: vowel
   - symbol: ao
     type: vowel
-  - symbol: eh
+  - symbol: e
+    old: eh
     type: vowel
   - symbol: er
     type: vowel

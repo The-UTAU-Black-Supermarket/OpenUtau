@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Linq;
 using System.Collections.Generic;
 using OpenUtau.Api;
 using OpenUtau.Core.G2p;
@@ -8,8 +8,15 @@ namespace OpenUtau.Plugin.Builtin {
     [Phonemizer("ARPAsing Extended Phonemizer", "EN ARPA-X", "TUBS", language: "EN")]
     public class ArpasingExtendedPhonemizer : SyllableBasedPhonemizer {
         protected IG2p g2p;
+        private List<string> vowels;
+        private List<string> consonants;
+
         public ArpasingExtendedPhonemizer() {
             g2p = new ArpabetG2p();
+            vowels = new List<string>();
+            vowels.AddRange("aa ae ah ao eh er ih iy uh uw ay ey oy ow aw ax".Split());
+            consonants = new List<string>();
+            consonants.AddRange("b ch d dh f g hh jh k l m n ng p q r s sh t th v w y z zh".Split());
         }
 
         public override void SetSinger(USinger singer) {
@@ -17,15 +24,16 @@ namespace OpenUtau.Plugin.Builtin {
             // load singer g2p stuff here
         }
 
-        protected override string[] GetVowels() => vowels;
-        private static readonly string[] vowels =
-            "aa ae ah ao eh er ih iy uh uw ay ey oy ow aw ax".Split();
+        protected override string[] GetVowels() => vowels.ToArray();
+        protected override string[] GetConsonants() => consonants.ToArray();
 
         protected override string[] GetSymbols(Note note) {
             if (string.IsNullOrEmpty(note.phoneticHint)) {
                 return g2p.Query(note.lyric.ToLowerInvariant());
             } else {
-                return note.phoneticHint.Split(" ");
+                return note.phoneticHint.Split(" ")
+                    .Where(s => GetVowels().Contains(s) || GetConsonants().Contains(s))
+                    .ToArray();
             }
         }
 
