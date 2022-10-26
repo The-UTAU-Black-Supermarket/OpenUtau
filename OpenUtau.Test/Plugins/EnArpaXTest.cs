@@ -30,6 +30,18 @@ namespace OpenUtau.Plugins {
             new string[] { "C3", "C3" },
             new string[] { "", "Power", },
             new string[] { "- t", "t eh", "eh s_P", "s t", "t w", "w er", "er d", "d z", "z -" })]
+        // Read legacy format arpasing.yaml from plugin folder
+        [InlineData("en_arpa_x",
+            new string[] { "legacy1" },
+            new string[] { "C3" },
+            new string[] { "", },
+            new string[] { "- p", "p l", "l ah", "ah g", "g ih", "ih n", "n -"})]
+        // Read legacy format arpasing.yaml from singer folder
+        [InlineData("en_arpa_x",
+            new string[] { "legacy2" },
+            new string[] { "C3" },
+            new string[] { "", },
+            new string[] { "- s", "s ih", "ih ng", "ng er", "er -" })]
         public void PhonemizeTest(string singerName, string[] lyrics, string[] tones, string[] colors, string[] aliases) {
             RunPhonemizeTest(singerName, lyrics, tones, colors, aliases);
         }
