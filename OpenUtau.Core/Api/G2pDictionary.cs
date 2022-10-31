@@ -56,6 +56,7 @@ namespace OpenUtau.Api {
         public class Builder {
             TrieNode root;
             Dictionary<string, bool> phonemeSymbols; // (phoneme, isVowel)
+            public Dictionary<string, bool> PhonemeSymbols { get { return phonemeSymbols; } }
 
             internal Builder() {
                 root = new TrieNode();

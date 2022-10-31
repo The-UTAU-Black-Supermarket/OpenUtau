@@ -58,6 +58,12 @@ namespace OpenUtau.Plugins {
             new string[] { "C3", "C3" },
             new string[] { "", "" },
             new string[] { "- jh", "jh ah", "ah s", "s t", "t b", "beh", "eh d", "d -" })]
+        // Read custom phonemes from legacy format arpasing.yaml
+        [InlineData("en_arpa_x",
+            new string[] { "legacy3" },
+            new string[] { "C3" },
+            new string[] { "", },
+            new string[] { "- a", "a dx", "dx -" })]
         public void PhonemizeTest(string singerName, string[] lyrics, string[] tones, string[] colors, string[] aliases) {
             RunPhonemizeTest(singerName, lyrics, tones, colors, aliases);
         }

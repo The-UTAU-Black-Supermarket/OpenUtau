@@ -40,6 +40,10 @@ symbols:
   - {symbol: y, type: semivowel}
   - {symbol: z, type: fricative}
   - {symbol: zh, type: fricative}
+  - {symbol: dx, type: stop}
+  - {symbol: a, type: vowel}
 entries:
   - grapheme: legacy2
     phonemes: [s, ih, ng, er]
+  - grapheme: legacy3
+    phonemes: [a, dx]

@@ -16,9 +16,7 @@ namespace OpenUtau.Plugin.Builtin {
 
         public ArpasingExtendedPhonemizer() {
             vowels = new List<string>();
-            vowels.AddRange("aa ae ah ao eh er ih iy uh uw ay ey oy ow aw ax".Split());
             consonants = new List<string>();
-            consonants.AddRange("b ch d dh f g hh jh k l m n ng p q r s sh t th v w y z zh".Split());
             LoadSettings();
         }
 
@@ -29,29 +27,42 @@ namespace OpenUtau.Plugin.Builtin {
 
         private void LoadSettings() {
             var g2ps = new List<IG2p>();
-
-            // Load legacy dict from plugin folder.
-            // No need to create if not available
-            string path = Path.Combine(PluginDir, "arpasing.yaml");
-            if (File.Exists(path)) {
-                g2ps.Add(G2pDictionary.NewBuilder().Load(File.ReadAllText(path)).Build());
-            }
+            // Load arpa-x dict from singer folder
+            // Load arpa-x dict from plugin folder, create if none
 
             // Load legacy dict from singer folder.
             if (singer != null && singer.Found && singer.Loaded) {
                 string file = Path.Combine(singer.Location, "arpasing.yaml");
                 if (File.Exists(file)) {
                     try {
-                        g2ps.Add(G2pDictionary.NewBuilder().Load(File.ReadAllText(file)).Build());
+                        var builder = G2pDictionary.NewBuilder().Load(File.ReadAllText(file));
+                        vowels.AddRange(builder.PhonemeSymbols.Keys.Where(s => builder.PhonemeSymbols[s]));
+                        consonants.AddRange(builder.PhonemeSymbols.Keys.Where(s => !builder.PhonemeSymbols[s]));
+
+                        g2ps.Add(builder.Build());
                     } catch (Exception e) {
                         Log.Error(e, $"Failed to load {file}");
                     }
                 }
             }
 
+            // Load legacy dict from plugin folder.
+            // No need to create if not available
+            string path = Path.Combine(PluginDir, "arpasing.yaml");
+            if (File.Exists(path)) {
+                var builder = G2pDictionary.NewBuilder().Load(File.ReadAllText(path));
+                vowels.AddRange(builder.PhonemeSymbols.Keys.Where(s => builder.PhonemeSymbols[s]));
+                consonants.AddRange(builder.PhonemeSymbols.Keys.Where(s => !builder.PhonemeSymbols[s]));
+                g2ps.Add(builder.Build());
+            }
+
             // Load base g2p.
             g2ps.Add(new ArpabetG2p());
+            vowels.AddRange("aa ae ah ao eh er ih iy uh uw ay ey oy ow aw ax".Split());
+            consonants.AddRange("b ch d dh f g hh jh k l m n ng p q r s sh t th v w y z zh".Split());
 
+            vowels = vowels.Distinct().ToList();
+            consonants = consonants.Distinct().ToList();
             g2p = new G2pFallbacks(g2ps.ToArray());
         }
 
