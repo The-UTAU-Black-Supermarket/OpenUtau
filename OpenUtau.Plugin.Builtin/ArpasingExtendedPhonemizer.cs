@@ -77,11 +77,20 @@ namespace OpenUtau.Plugin.Builtin {
             var symbols = new List<string>();
             symbols.Add(syllable.prevV == "" ? "-" : syllable.prevV);
             symbols.AddRange(syllable.cc);
-            symbols.Add(syllable.v);
-
-            for (int i = 0; i < symbols.Count-1; i++) {
-                phonemes.Add($"{symbols[i]} {symbols[i+1]}");
+            if (syllable.cc.Length == 0) {
+                symbols.Add(syllable.v);
             }
+
+            for (int i = 0; i < symbols.Count - 1; i++) {
+                phonemes.Add($"{symbols[i]} {symbols[i + 1]}");
+            }
+
+            if(syllable.cc.Length > 0) {
+                var cv = new[] { $"{syllable.cc.Last()}{syllable.v}",
+                $"{syllable.cc.Last()} {syllable.v}"};
+                TryAddPhoneme(phonemes, syllable.vowelTone, cv);
+            }
+
             return phonemes;
         }
 
